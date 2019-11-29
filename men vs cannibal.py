@@ -1,5 +1,3 @@
-import queue
-
 start = [3,3,0,[]]
 final = [0,0,1,[]]
 depthCounter =0
@@ -110,7 +108,34 @@ def BFSMethod():
 		else:												#get every possible statein between
 			print(curr)
 			counter = curr[3]
-	
+
+
+def DFSMethod():
+	state = [3,3,0,0,0]		#man,cannibal,side,counter,noOfChild
+	complete = False
+	stateSet = []
+	stateSet.append(state)
+	complete = False
+
+	while not complete:
+		currState = stateSet[len(stateSet)-1]
+		currMen = currState[0]
+		currCannibal = currState[1]
+		currSide = currState[2]
+		parentState =currState[3]
+		childCount = currState[4]
+
+		if(currMen == 0 and currCannibal ==0 and currSide==1):	#Condition Complete
+			complete = True
+		elif currSide==2:  	 #for error
+			counter+=1
+			continue
+		else:
+			if(currMen>=0 and currMen<=3 and currCannibal>=0 and currCannibal<=3):		#To check if within bounds
+				if(currMen==0 or currMen==3 or currMen==currCannibal):		#For conditions where cannibal outnumber men
+					if(childCount<=5):										#If all child are already searched for
+						
+
 
 def toggleSide(side):
 	if(side == 1):
@@ -121,6 +146,8 @@ def toggleSide(side):
 
 if __name__ == '__main__':
 	# MyMethod(start)
-	BFSMethod()
+	# BFSMethod()
+	DFSMethod()
+	temp =[1,2,4,5]
 
 
