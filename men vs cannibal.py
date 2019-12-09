@@ -6,39 +6,6 @@ start = [3,3,0,[]]
 final = [0,0,1,[]]
 goal = [0,0,1]
 checkRange = range(0,4)
-depthCounter =0
-
-def MyMethod(currState):
-	men =currState[0]
-	cannibal = currState[1]
-	side = currState[2]
-	tempParents = currState[3]
-
-	if(men ==0 and cannibal==0 and side == 1):
-			tempParents.append(currState)
-			for state in tempParents:
-				print(str(state[0])+str(state[1])+str(state[2]))
-			print("-----------")
-
-	if(men>=0 and cannibal>=0 and men<=3 and cannibal<=3):
-		if(men == 0 or men ==3 or men == cannibal):
-			if(currState not in tempParents):
-				tempParents.append(currState)
-				if(side==0):
-					side = 1-side
-					MyMethod([men-1,cannibal,side,tempParents])
-					MyMethod([men,cannibal-1,side,tempParents])
-					MyMethod([men-1,cannibal-1,side,tempParents])
-					MyMethod([men-2,cannibal,side,tempParents])
-					MyMethod([men,cannibal-2,side,tempParents])
-				else:
-					side =toggleSide(side)
-					MyMethod([men+1,cannibal,side,tempParents])
-					MyMethod([men,cannibal+1,side,tempParents])
-					MyMethod([men+1,cannibal+1,side,tempParents])
-					MyMethod([men+2,cannibal,side,tempParents])	
-					MyMethod([men,cannibal+2,side,tempParents])
-	
 
 def BFSMethod():
 	state = [3,3,0,0]
@@ -65,7 +32,7 @@ def BFSMethod():
 			counter+=1
 			continue
 		else:
-			if(currMen>=0 and currMen<=3 and currCannibal>=0 and currCannibal<=3):		#To check if within bounds
+			if(currMen in checkRange and currCannibal in checkRange):		#To check if within bounds
 				if(currMen==0 or currMen==3 or currMen==currCannibal):		#For conditions where cannibal outnumber men
 					side = 1-currSide
 					temp =[]				#TempSet variable
@@ -96,6 +63,7 @@ def BFSMethod():
 
 		counter+=1
 
+# Building the tree
 	print("---------------------")
 	counter = 1
 	nodes =[]
@@ -111,58 +79,41 @@ def BFSMethod():
 	DotExporter(nodes[0]).to_dotfile(fileLoc)
 	render('dot','png',fileLoc)
 
-# Building the tree
 
-	# while(counter>=0):
-	# 	curr = stateSet[counter]
-	# 	if(curr[0]==0 and curr[1]==0 and curr[2]==1):		#get final state
-	# 		print(curr)
-	# 		counter = curr[3]
-	# 		break
-	# 	else:
-	# 		counter-=1
-	# while(counter>=0):
-	# 	curr = stateSet[counter]
-	# 	if(curr[0]==3 and curr[1]==3 and curr[2]==0):		#get intital state
-	# 		print(curr)
-	# 		counter =-1
-	# 	else:												#get every possible statein between
-	# 		print(curr)
-	# 		counter = curr[3]
-
-
-def DFS(state,parentList,treeNodes,parentNode):
+def DFSrecur(state,parentList):
 	if(state == goal):
 		parentList.append(state)
 		PrintAllStates(parentList)
 		print("-------------------\n")
+		DFSComplete=True
 		return 0
 	else:
 		men = state[0]
 		cannibal = state[1]
 		side = state[2]
+		parent = state[3]
+
 		if(men in checkRange and cannibal in checkRange and CheckPossible(men,cannibal)):
 			if(state in parentList):
 				return 0
 				
 			else:
 				parentList.append(state)
-				treeNodes.append(Node(str(state),parent = parentNode))
 				if(side==0):
 					side = 1-side
-					DFS([men-1,cannibal,side],parentList,treeNodes,str(state))
-					DFS([men-2,cannibal,side],parentList,treeNodes,str(state))
-					DFS([men-1,cannibal-1,side],parentList,treeNodes,str(state))
-					DFS([men,cannibal-1,side],parentList,treeNodes,str(state))
-					DFS([men,cannibal-2,side],parentList,treeNodes,str(state))
+					DFS([men-1,cannibal,side],parentList)
+					DFS([men-2,cannibal,side],parentList)
+					DFS([men-1,cannibal-1,side],parentList)
+					DFS([men,cannibal-1,side],parentList)
+					DFS([men,cannibal-2,side],parentList)
 
 				elif(side ==1):
 					side = 1-side
-					DFS([men+1,cannibal,side],parentList,treeNodes,str(state))
-					DFS([men+2,cannibal,side],parentList,treeNodes,str(state))
-					DFS([men+1,cannibal+1,side],parentList,treeNodes,str(state))
-					DFS([men,cannibal+1,side],parentList,treeNodes,str(state))
-					DFS([men,cannibal+2,side],parentList,treeNodes,str(state))
+					DFS([men+1,cannibal,side],parentList)
+					DFS([men+2,cannibal,side],parentList)
+					DFS([men+1,cannibal+1,side],parentList)
+					DFS([men,cannibal+1,side],parentList)
+					DFS([men,cannibal+2,side],parentList)
 		else:
 			return 0
 
@@ -175,18 +126,94 @@ def CheckPossible(men,cannibal):
 		return True
 	return False
 
+def DFS():       #use a stack to help track remaining nodes
+	state = [3,3,0,0,False]				#[men,cannibal,side,parent,visited]
+	complete = False
+	stateSet = []
+	stateSet.append(state)
+
+	complete = False
+	completeLength =0
+	counter =0
+
+	while not complete:
+		decCounter = 1
+		counter = len(stateSet)-decCounter
+		currState = stateSet[counter]
+		while(currState[4]):
+			decCounter+=1
+			counter = len(stateSet)-decCounter
+			currState = stateSet[counter]
+		currState[4] = True
+
+		currMen = currState[0]								#Getting current state values
+		currCannibal = currState[1]
+		currSide = currState[2]
+
+		# print(currState)
+		if(currMen == 0 and currCannibal ==0 and currSide==1):	#Condition Complete
+			complete = True
+			break
+		elif currSide==2:  	 #for error
+			continue
+		else:
+			if(currMen in checkRange and currCannibal in checkRange):		#To check if within bounds
+				if(currMen==0 or currMen==3 or currMen==currCannibal):		#For conditions where cannibal outnumber men
+					side = 1-currSide
+					temp =[]				#TempSet variable
+
+					compareSet = []			#Set without the parent index
+					for i in stateSet:
+						compareSet.append([i[0],i[1],i[2]])
+
+					if(currSide == 0):			#If in left side decrease
+						temp.append([currMen-1,currCannibal,side,counter,False])
+						temp.append([currMen,currCannibal-1,side,counter,False])
+						temp.append([currMen-1,currCannibal-1,side,counter,False])
+						temp.append([currMen-2,currCannibal,side,counter,False])
+						temp.append([currMen,currCannibal-2,side,counter,False])
+					else:						#If in right side,counter,False increase
+						temp.append([currMen+1,currCannibal,side,counter,False])
+						temp.append([currMen,currCannibal+1,side,counter,False])
+						temp.append([currMen+1,currCannibal+1,side,counter,False])
+						temp.append([currMen+2,currCannibal,side,counter,False])
+						temp.append([currMen,currCannibal+2,side,counter,False])
+
+					for val in temp:
+						if(val[0] in checkRange and val[1] in checkRange):		#if the added value is within range
+							valSet=[val[0],val[1],val[2]]
+							if(valSet not in compareSet):				#if the state already exists in the tree
+								stateSet.append(val)
+
+
+# Building the tree
+	print("---------------------")
+	counter = 1
+	nodes =[]
+	nodes.append(Node(str([3,3,0,0])))
+	for i in stateSet:
+		print(str(i))
+	while counter< len(stateSet):
+		parentNode = nodes[(stateSet[counter][3])]
+		nodes.append(Node(str([stateSet[counter][0],stateSet[counter][1],stateSet[counter][2]]),parent = parentNode))
+		counter+=1
+	# for pre, fill, node in RenderTree(nodes[0]):
+	# 	print("%s%s" %(pre,node.name))
+
+	fileLoc = "E:/7th Sem/Artificial Intelligence/Assignments/DFSTree.dot"
+	DotExporter(nodes[0]).to_dotfile(fileLoc)
+	render('dot','png',fileLoc)
+
 if __name__ == '__main__':
-	# MyMethod(start)
 	print("BFS METHOD")
 	BFSMethod()
 
-	# treeNodes= []
-	# treeNodes.append(Node(str([3,3,0])))
 	# print("\n\nDFS METHOD")
-	# DFS([3,3,0],[],treeNodes,treeNodes[0])
-	# fileLoc = "E:/7th Sem/Artificial Intelligence/Assignments/DFSTree.dot"
-	# DotExporter(treeNodes[0]).to_dotfile(fileLoc)
-	# render('dot','png',fileLoc)
+	# DFSrecur([3,3,0],[])
+
+	print("DFS MEthod")
+	DFS()
+
 	
 
 
