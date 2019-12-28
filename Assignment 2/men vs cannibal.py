@@ -90,7 +90,6 @@ def BFSMethod():
 	nodes.append(Node(str([3,3,0])))
 	count =1
 	while count < len(states):
-		print(states[count])
 		parentNode = nodes[count-1]
 		nodes.append(Node(str(states[count]),parent = parentNode))
 		count+=1

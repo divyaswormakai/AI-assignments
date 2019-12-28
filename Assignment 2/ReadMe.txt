@@ -1,0 +1,1 @@
+Graphviz and anytree should be installed along with python verson 3.3+ to run the file
